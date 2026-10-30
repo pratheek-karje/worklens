@@ -345,6 +345,18 @@ async def ingest(
         "chunks": len(chunks)
     }
 
+@app.get("/documents/stats")
+def get_document_stats(user = Depends(get_current_user)):
+    # Grab all metadata from ChromaDB collection
+    results = collection.get(include=["metadatas"])
+    metadatas = results.get("metadatas") or []
+
+    unique_sources = {m.get("source") for m in metadatas if m and m.get("source")}
+
+    return {
+        "count": len(unique_sources),
+        "documents": sorted(list(unique_sources))
+    }
 
 @app.post("/query")
 async def query(
